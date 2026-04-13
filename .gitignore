@@ -1,0 +1,14 @@
+# 敏感文件
+tokens.json
+presets/default_keys.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 日志
+*.log
+
+# macOS
+.DS_Store

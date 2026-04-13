@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "keys": [
+    {
+      "name": "示例用户",
+      "token": "tk_YOUR_TOKEN_HERE",
+      "api_key": "YOUR_API_KEY_HERE",
+      "created_at": "2026-04-13T00:00:00.000000",
+      "expires_at": "2027-04-13T00:00:00.000000",
+      "limits": {
+        "daily": 500,
+        "monthly": 5000,
+        "minute": 10
+      }
+    }
+  ]
+}
