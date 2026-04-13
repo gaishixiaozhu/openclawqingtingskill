@@ -1,14 +1,30 @@
-# 敏感文件
+# =======================
+# 运营者专用（不上传）
+# =======================
+
+# 服务器代码
+api_server.py
+token_manager.py
+key_pool.py
+rate_limiter.py
+sql_filter.py
+config.py
+
+# Token相关
 tokens.json
-presets/default_keys.json
+gen_keys.py
+run_gen_keys.sh
+
+# 预设Key
+presets/*.json
+presets/*.json.bak
+
+# 日志
+*.log
 
 # Python
 __pycache__/
 *.pyc
-*.pyo
-
-# 日志
-*.log
 
 # macOS
 .DS_Store

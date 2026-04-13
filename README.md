@@ -1,4 +1,4 @@
-# 蜻蜓数据API
+# 蜻蜓数据API - 客户使用版
 
 基于Token鉴权的高考志愿填报数据安全访问接口。
 
@@ -6,7 +6,7 @@
 
 ## ⚠️ 启用前必读
 
-**本技能需要以下配置才能使用：**
+**本接口需要以下配置才能使用：**
 1. API服务器地址（URL）
 2. 个人访问Token
 
@@ -16,48 +16,41 @@
 
 ## 功能特点
 
-- 🔐 **Token鉴权** - 每个用户独立Token，防止未授权访问
-- 🛡️ **SQL白名单** - 只读查询，禁止危险操作
-- 🚫 **字段过滤** - 不暴露数据库结构
-- ⚡ **速率限制** - 防爬虫、防滥用
+- 🔐 **Token鉴权** - 每个用户独立Token
+- 🛡️ **SQL白名单** - 只读查询，安全可靠
+- ⚡ **速率限制** - 防滥用，保护数据
 - 📊 **配额管理** - 按需分配查询额度
 
 ---
 
-## 快速开始
+## 配置说明
 
-### 1. 安装
+### 1. 安装OpenClaw技能
 
-```bash
-git clone https://github.com/gaishixiaozhu/openclawqingtingskill.git
-cd openclawqingtingskill
-pip install flask
+将此SKILL.md放置到您的OpenClaw技能目录：
+```
+~/.openclaw/workspace/skills/ql-data-api/
 ```
 
-### 2. 配置
+### 2. 配置连接信息
 
-编辑 `config.py`，填入您的信息：
+在OpenClaw技能配置中填入：
+- `QL_API_BASE` - API服务器地址
+- `QL_API_TOKEN` - 您的个人Token
 
-```python
-API_BASE = "http://您的服务器地址:5005"
-DEFAULT_TOKEN = "您的Token"
-```
+---
 
-### 3. 启动服务
+## 使用示例
 
-```bash
-python3 api_server.py
-```
-
-### 4. 测试查询
+### Python调用示例
 
 ```python
 import requests
 
 TOKEN = "您的Token"
-API_BASE = "http://您的服务器地址:5005"
+API_BASE = "http://服务器地址:5005"
 
-# 验证连接
+# 验证Token
 resp = requests.get(f"{API_BASE}/health")
 print(resp.json())
 
@@ -67,10 +60,22 @@ data = {
     "sql": '''SELECT s.school, p.pro, p.low_real
               FROM clp_profession_data_sd p
               JOIN clp_school s ON p.school_id = s.id
-              WHERE p.year = "2025" LIMIT 5'''
+              WHERE p.year = "2025"
+              LIMIT 5'''
 }
 resp = requests.post(f"{API_BASE}/query", json=data)
 print(resp.json())
+```
+
+### cURL调用示例
+
+```bash
+curl -X POST http://服务器地址:5005/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "您的Token",
+    "sql": "SELECT s.school, p.pro FROM clp_profession_data_sd p JOIN clp_school s ON p.school_id = s.id WHERE p.year = \"2025\" LIMIT 5"
+  }'
 ```
 
 ---
@@ -85,13 +90,27 @@ print(resp.json())
 
 ---
 
-## 可查询省份
+## 省份代码
 
-山东(SD)、福建(FJ)、辽宁(LN)、广东(GD)、江苏(JS)、浙江(ZJ)、四川(SC)、河南(HEN)等31省。
+31省数据均可查询，详见SKILL.md中的省份代码表。
 
 ---
 
-## 联系获取Token和服务器地址
+## 常见问题
+
+**Q: 查询结果没有学校名称？**
+A: 必须使用JOIN关联院校表：
+```sql
+FROM clp_profession_data_sd p
+JOIN clp_school s ON p.school_id = s.id
+```
+
+**Q: 为什么查不到数据？**
+A: 检查：1) 年份是否正确 2) 科类是否正确 3) 省份代码是否正确
+
+---
+
+## 联系获取Token
 
 **请联系蜻蜓生涯获取API服务器地址和您的个人Token。**
 
