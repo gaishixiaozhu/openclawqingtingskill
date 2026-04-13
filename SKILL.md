@@ -1,6 +1,6 @@
 ---
 name: ql_data_api
-description: 蜻蜓数据库API技能。基于令牌鉴权的安全数据查询接口，合作伙伴可通过API访问高考志愿填报数据。⚠️使用前需配置API服务器地址和Token，详见README。
+description: 蜻蜓数据库API技能。基于令牌鉴权的安全数据查询接口，合作伙伴可通过API访问高考志愿填报数据。⚠️使用前需配置API服务器地址和Token。
 metadata:
   openclaw:
     requires:
@@ -14,6 +14,21 @@ metadata:
 # 蜻蜓数据API技能
 
 > ⚠️ **启用前请先配置** - 本技能需要配置API服务器地址和Token才能使用
+
+---
+
+## 📁 仓库结构说明
+
+```
+ql-data-api/
+├── README.md           # 总体说明
+├── SKILL.md           # 本文件
+├── client/            # 👤 使用者代码
+│   ├── README.md
+│   └── example.py     # API调用示例
+└── server/            # 🔧 运营者代码
+    └── README.md
+```
 
 ---
 
@@ -32,7 +47,6 @@ clp_profession_data_{省}.school_id = clp_school.id
 ```sql
 -- 错误：直接查专业表没有学校名称
 SELECT * FROM clp_profession_data_ln WHERE year = "2025"
--- 结果：只有school_id数字，没有学校名字段
 ```
 
 ### ✅ 正确做法：JOIN院校表
@@ -46,58 +60,41 @@ WHERE p.year = "2025"
 LIMIT 10
 ```
 
-**JOIN后结果：**
-| school | pro | low_real | plan_num |
-|--------|-----|----------|----------|
-| 大连大学 | 建筑学 | 500 | 10 |
-| 大连理工大学 | 建筑学 | 580 | 30 |
-
 ---
 
 ## 数据库表结构
 
 ### 1. clp_school（院校信息表）
 
-院校基本信息，一个院校一条记录。
-
-| 字段 | 类型 | 说明 | 示例 |
-|------|------|------|------|
-| id | INTEGER | 院校ID（用于JOIN） | 17 |
-| school | TEXT | 院校名称 | 大连大学 |
-| prov | TEXT | 所在省份 | 辽宁 |
-| city | TEXT | 所在城市 | 大连 |
-| batch | TEXT | 招生批次 | 本科一批 |
-| is_985 | INTEGER | 是否985 | 0/1 |
-| is_211 | INTEGER | 是否211 | 0/1 |
-| is_gov | INTEGER | 是否公办 | 0/1 |
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | INTEGER | 院校ID（用于JOIN） |
+| school | TEXT | 院校名称 |
+| prov | TEXT | 所在省份 |
+| city | TEXT | 所在城市 |
 
 ### 2. clp_profession_data_{省}（专业录取数据表）
 
 ⚠️ **必须JOIN clp_school才能获取学校名称！**
 
-| 字段 | 类型 | 说明 | 示例 |
-|------|------|------|------|
-| id | INTEGER | 记录ID | 12345 |
-| school_id | INTEGER | **关联院校ID** | 17 |
-| pro | TEXT | 专业名称 | 建筑学 |
-| pro_note | TEXT | 专业备注 | 国家特色专业 |
-| year | TEXT | 年份 | 2025/2024/2023 |
-| nature | TEXT | 科类 | 物理/历史/理科/文科 |
-| batch | TEXT | 批次 | 本科批/本科一批 |
-| low_real | INTEGER | 最低录取分 | 562 |
-| low_rank_real | INTEGER | 最低录取位次 | 45000 |
-| avg_real | INTEGER | 平均分 | 568 |
-| plan_num | INTEGER | 招生计划数 | 120 |
+| 字段 | 说明 |
+|------|------|
+| school_id | 关联院校ID（用于JOIN） |
+| pro | 专业名称 |
+| year | 年份（2025/2024/2023） |
+| nature | 科类 |
+| low_real | 最低录取分 |
+| plan_num | 招生计划数 |
 
 ### 3. clp_score_rank（一分一段表）
 
-| 字段 | 类型 | 说明 | 示例 |
-|------|------|------|------|
-| prov | TEXT | 省份 | 辽宁 |
-| year | TEXT | 年份 | 2025 |
-| nature | TEXT | 科类 | 物理/历史/理科/文科 |
-| score | INTEGER | 分数 | 600 |
-| rank | INTEGER | 位次 | 45000 |
+| 字段 | 说明 |
+|------|------|
+| prov | 省份 |
+| year | 年份 |
+| nature | 科类 |
+| score | 分数 |
+| rank | 位次 |
 
 ---
 
@@ -122,7 +119,7 @@ LIMIT 10
 | sx | 山西 | xj | 新疆 |
 | shx | 陕西 | xz | 西藏 |
 | gs | 甘肃 | han | 海南 |
-| **heb** | **河北** | nmgs | 内蒙古(呼伦贝尔) |
+| **heb** | **河北** | | |
 
 ---
 
@@ -152,54 +149,7 @@ ORDER BY p.low_real DESC
 LIMIT 30
 ```
 
-### 示例3：按科类查询（首选科目）
-
-辽宁是新高考"3+1+2"省份，nature字段值为"首选科目物理"或"首选科目历史"
-
-```sql
-SELECT s.school, p.pro, p.low_real, p.nature, p.plan_num
-FROM clp_profession_data_ln p
-JOIN clp_school s ON p.school_id = s.id
-WHERE p.year = "2025"
-  AND p.nature = "首选科目物理"
-  AND p.pro LIKE "%建筑%"
-LIMIT 20
-```
-
-### 示例4：查某分数能上哪些院校（等位分法）
-
-```sql
--- 第一步：查分数对应的位次
-SELECT score, rank
-FROM clp_score_rank
-WHERE prov = "辽宁"
-  AND year = "2025"
-  AND nature = "物理"
-  AND score = 550
-
--- 第二步：用位次查可报考的院校
-SELECT s.school, p.pro, p.low_real, p.low_rank_real
-FROM clp_profession_data_ln p
-JOIN clp_school s ON p.school_id = s.id
-WHERE p.year = "2025"
-  AND p.nature = "首选科目物理"
-  AND p.low_rank_real BETWEEN 40000 AND 50000
-ORDER BY p.low_rank_real
-LIMIT 20
-```
-
-### 示例5：查某省份所有院校
-
-```sql
-SELECT DISTINCT s.school, s.city, s.batch
-FROM clp_profession_data_ln p
-JOIN clp_school s ON p.school_id = s.id
-WHERE p.year = "2025"
-ORDER BY s.school
-LIMIT 50
-```
-
-### 示例6：查河北省的专业数据
+### 示例3：河北省查询
 
 ⚠️ **河北是3+1+2省份，nature值必须是"首选科目物理"或"首选科目历史"**
 
@@ -235,23 +185,11 @@ FROM clp_profession_data_ln p
 JOIN clp_school s ON p.school_id = s.id
 ```
 
-**Q: school_id和clp_school_id有什么区别？**
-A: `school_id`是用于JOIN的字段，`clp_school_id`是蜻蜓内部ID，不需要使用。
-
-**Q: 如何查指定学校？**
-A: 使用 `s.school LIKE "%关键词%"`
-```sql
-WHERE s.school LIKE "%大连理工%"
-```
-
 **Q: 河北怎么查？**
-A: 河北代码是 `heb`，不是 `hb`！注意nature值要用 `"首选科目物理"` 或 `"首选科目历史"`
-```sql
-SELECT s.school, p.pro, p.low_real
-FROM clp_profession_data_heb p
-JOIN clp_school s ON p.school_id = s.id
-WHERE p.year = "2025"
-  AND p.nature = "首选科目物理"
-  AND s.prov = "河北"
-LIMIT 10
-```
+A: 河北代码是 `heb`，nature值要用 `"首选科目物理"` 或 `"首选科目历史"`
+
+---
+
+## 联系获取Token
+
+**请联系蜻蜓生涯获取API服务器地址和您的个人Token。**
