@@ -103,6 +103,8 @@ LIMIT 10
 
 ## 省份代码
 
+⚠️ **注意：河北代码是 `heb`，不是 `hb`！**
+
 | 代码 | 省份 | 代码 | 省份 |
 |------|------|------|------|
 | sd | 山东 | jl | 吉林 |
@@ -120,6 +122,7 @@ LIMIT 10
 | sx | 山西 | xj | 新疆 |
 | shx | 陕西 | xz | 西藏 |
 | gs | 甘肃 | han | 海南 |
+| **heb** | **河北** | nmgs | 内蒙古(呼伦贝尔) |
 
 ---
 
@@ -224,4 +227,15 @@ A: `school_id`是用于JOIN的字段，`clp_school_id`是蜻蜓内部ID，不需
 A: 使用 `s.school LIKE "%关键词%"`
 ```sql
 WHERE s.school LIKE "%大连理工%"
+```
+
+**Q: 河北怎么查？**
+A: 河北代码是 `heb`，不是 `hb`！
+```sql
+SELECT s.school, p.pro, p.low_real
+FROM clp_profession_data_heb p
+JOIN clp_school s ON p.school_id = s.id
+WHERE p.year = "2025"
+  AND s.prov = "河北"
+LIMIT 10
 ```
