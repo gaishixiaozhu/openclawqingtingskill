@@ -199,13 +199,28 @@ ORDER BY s.school
 LIMIT 50
 ```
 
+### 示例6：查河北省的专业数据
+
+⚠️ **河北是3+1+2省份，nature值必须是"首选科目物理"或"首选科目历史"**
+
+```sql
+SELECT s.school, p.pro, p.low_real, p.plan_num
+FROM clp_profession_data_heb p
+JOIN clp_school s ON p.school_id = s.id
+WHERE p.year = "2025"
+  AND p.nature = "首选科目物理"
+  AND p.pro LIKE "%计算机%"
+ORDER BY p.low_real DESC
+LIMIT 20
+```
+
 ---
 
 ## 科类(nature)说明
 
 | 省份类型 | nature示例 | 说明 |
 |----------|------------|------|
-| 3+1+2省份 | 首选科目物理/首选科目历史 | 辽宁/广东/福建等 |
+| 3+1+2省份 | 首选科目物理/首选科目历史 | 辽宁/河北/广东/福建等 |
 | 3+3省份 | 物理/化学/历史等 | 山东/浙江 |
 | 老高考 | 理科/文科 | 大多数省份 |
 
@@ -230,12 +245,13 @@ WHERE s.school LIKE "%大连理工%"
 ```
 
 **Q: 河北怎么查？**
-A: 河北代码是 `heb`，不是 `hb`！
+A: 河北代码是 `heb`，不是 `hb`！注意nature值要用 `"首选科目物理"` 或 `"首选科目历史"`
 ```sql
 SELECT s.school, p.pro, p.low_real
 FROM clp_profession_data_heb p
 JOIN clp_school s ON p.school_id = s.id
 WHERE p.year = "2025"
+  AND p.nature = "首选科目物理"
   AND s.prov = "河北"
 LIMIT 10
 ```
