@@ -4,6 +4,16 @@
 
 ---
 
+## ⚠️ 启用前必读
+
+**本技能需要以下配置才能使用：**
+1. API服务器地址（URL）
+2. 个人访问Token
+
+**请联系蜻蜓生涯获取以上配置信息。**
+
+---
+
 ## 功能特点
 
 - 🔐 **Token鉴权** - 每个用户独立Token，防止未授权访问
@@ -26,23 +36,29 @@ pip install flask
 
 ### 2. 配置
 
-将您的Token配置到代码中：
+编辑 `config.py`，填入您的信息：
 
 ```python
-TOKEN = "您的Token"
-API_BASE = "http://服务器地址:5005"
+API_BASE = "http://您的服务器地址:5005"
+DEFAULT_TOKEN = "您的Token"
 ```
 
-### 3. 查询示例
+### 3. 启动服务
+
+```bash
+python3 api_server.py
+```
+
+### 4. 测试查询
 
 ```python
 import requests
 
 TOKEN = "您的Token"
-API_BASE = "http://服务器地址:5005"
+API_BASE = "http://您的服务器地址:5005"
 
-# 验证Token
-resp = requests.get(f"{API_BASE}/check_token?token={TOKEN}")
+# 验证连接
+resp = requests.get(f"{API_BASE}/health")
 print(resp.json())
 
 # 执行查询
@@ -75,9 +91,9 @@ print(resp.json())
 
 ---
 
-## 联系获取Token
+## 联系获取Token和服务器地址
 
-需要API Token请联系蜻蜓生涯。
+**请联系蜻蜓生涯获取API服务器地址和您的个人Token。**
 
 ---
 
